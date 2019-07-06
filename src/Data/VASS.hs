@@ -12,8 +12,6 @@ import Data.VASS.Shared
 import Text.Printf
 import Data.Coerce
 
-import Utils
-
 -- | Vector Addition Systems with States (VASS) are a common formalism used
 -- to represent programs, business processes, and much more.
 data VASS = VASS 
@@ -60,3 +58,15 @@ reverse s@VASS{..} = s{
         swap :: (Label State, Labelled Transition) -> (Label State, Labelled Transition)
         swap (preState, (label, (pre,post,postState) ) ) 
                 = (postState, (coerce $ coerce label ++ "'", (post, pre, preState) ) )
+
+
+----------
+-- ** Helper Functions
+
+-- | Aggregate all KV pairs with the same key into a multimap.
+collate :: Ord a => [(a, b)] -> Map a [b]
+collate = foldr (\(k,v) m -> Map.insertWith (++) k [v] m) mempty
+
+-- | Inverse of `collate`.
+decollate :: Ord a => Map a [b] -> [(a,b)]
+decollate = concat . Map.mapWithKey (\k vs -> map (k,) vs) 

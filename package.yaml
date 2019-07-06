@@ -8,11 +8,10 @@ copyright:           "2019 Alex Dixon"
 
 extra-source-files:
 - README.md
-- ChangeLog.md
 
 # Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
+# synopsis:            Haskell implementation of Vector Addition Systems with States.
+# category:            data
 
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
@@ -21,6 +20,27 @@ description:         Please see the README on GitHub at <https://github.com/dixo
 
 dependencies:
 - base >= 4.7 && < 5
+- containers
+- vector
+- megaparsec
+- filepath
+- mtl
+- diagrams
+- diagrams-svg
+- diagrams-core 
+- diagrams-lib
+- diagrams-contrib
+- SVGFonts
+
+default-extensions:
+- TypeSynonymInstances
+- UnicodeSyntax
+- RecordWildCards
+- OverloadedStrings
+- QuasiQuotes
+- LambdaCase
+- FlexibleInstances
+- TupleSections
 
 library:
   source-dirs: src
