@@ -41,6 +41,7 @@ default-extensions:
 - LambdaCase
 - FlexibleInstances
 - TupleSections
+- LambdaCase
 
 library:
   source-dirs: src
