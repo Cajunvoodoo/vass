@@ -68,27 +68,24 @@ data VASS = VASS
     }
     deriving (Eq, Show)
 
-{-
-{- * Helper functions
 
-    Generic functions which have common usage 
-    or simplify some external code.
--}
+-- Given a VASS, swap all its transitions round.
+reverse :: VASS -> VASS
+reverse v@VASS{..} = v 
+    { transitions = collate . map rearrange . decollate $ transitions }
 
--- | Get the full range of values from a bounded enumeration.
-range :: (Enum a, Bounded a) => [a]
-range = [ minBound .. maxBound ]
+    where
+        decollate :: (Ord k, Eq a) 
+            => Map k (Vector a) 
+            -> [(k, a)]
+        decollate m = [ (a, b) | (a,as) <- Map.toList m, b <- toList as]
 
--- | Get one value from an alternative.
-choice :: (Alternative f) => [f a] -> f a
-choice = foldr1 (<|>)
+        collate :: (Ord k, Eq a, Semigroup (f a), Applicative f) 
+            => [(k, a)] 
+            -> Map k (f a)
+        collate l = Map.fromListWith (<>) $ second pure <$> l
 
--- | Determine whether some structure contains
---  an element larger than some value.
-contains :: (Foldable f, Eq a, Ord a) => f a -> a -> Bool
-container `contains` elem = any (elem <=) $ toList container
-
-(!@) :: (Monoid a, Ord k) => Map k a -> k -> a
-map !@ key = Map.findWithDefault mempty key map
-
--}
+        rearrange :: (Name State, Transition) 
+            -> (Name State, Transition)
+        rearrange (s, Transition name pre post s') 
+            = (s', Transition name post pre s)
