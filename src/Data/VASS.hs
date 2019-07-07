@@ -1,72 +1,94 @@
 module Data.VASS where
 
-import Data.Map (Map, (!))
-import qualified Data.Map as Map
+-- | Datatypes
 import qualified Data.Vector as Vector
+import Data.Vector (Vector)
+import qualified Data.Map as Map
+import Data.Map (Map)
+import qualified Data.Graph as Tree
+import Data.Graph (Tree)
+import Data.String
+import Data.Void
 
+-- | Typeclasses & Control Flow
+import Control.Applicative
+import Data.Foldable
 import Data.Bifunctor (second)
-
-import Data.VAS hiding (Configuration, Configured)
-
-import Data.VASS.Shared
-import Text.Printf
+import Data.Monoid
+import Data.Semigroup
 import Data.Coerce
 
--- | Vector Addition Systems with States (VASS) are a common formalism used
--- to represent programs, business processes, and much more.
-data VASS = VASS 
-    { states      :: [Label State]
-    , transitions :: Map (Label State) [Labelled Transition]
+import Text.Megaparsec hiding (State)
+
+
+--------------------------------------------------------------------------------
+-- * General Definitions
+
+-- | A name is just a label attached to something.
+newtype Name a = Name String
+    deriving (Eq, Ord, Show, Semigroup, Monoid, IsString)
+
+data State = State
+data Place = Place
+
+
+data Transition = Transition 
+    { name      :: Name Transition
+    , pre       :: Vector Integer
+    , post      :: Vector Integer
+    , nextState :: Name State
+    } 
+    deriving (Eq, Show)
+
+
+data Configuration a = Configuration
+    { state :: Name State
+    , vec   :: Vector a
     }
+    deriving (Eq, Show)
+
+type Conf = Configuration Integer
 
 
-instance Show VASS where
-    show VASS{..} = 
-        let
-            showStates = unwords $ map show states
-            showState q = show q ++ ":\n" ++ unlines (map showTrans (transitions ! q))
-            showTrans (n, (a, b, c)) = printf "  %s:  %s  %s  %s"
-                                       n (show a) (show b) (show c)
-        in 
-            "States:\n" ++ showStates ++ "\n\nTransitions:\n" ++ unlines (map showState states)
+--------------------------------------------------------------------------------
+-- * Vector Addition Systems with States (VASS)
 
-            
--- | Get the transitions in the VASS which are active from a given configuration.
-activeTransitions :: VASS -> Configuration -> [Labelled Transition]
-activeTransitions VASS{..} (q, m) = filter (\(_, (a,_,_)) -> a >= m) $ transitions ! q
+{- |A VASS is a VAS extended to include state. They are equal to VASs in
+    expressivity.
 
-fromConfiguredVAS :: Configured VAS -> Configured VASS
-fromConfiguredVAS = second fromVAS
+    Most algorithms and consider VASSs rather than VASs, for the sake of
+    generality.
+-}
 
-fromVAS :: VAS -> VASS
-fromVAS (VAS ts) = let
-    states = ["μ"]
-    makeTrans :: Int -> (V,V) -> Labelled Transition
-    makeTrans i (pre, post) = (,)
-                              (coerce $ "t_"++show i)
-                              (fromIntegral <$> pre, fromIntegral <$> post, "μ")
-
-    t = zipWith makeTrans [1..] (Vector.toList ts)
-    transitions = Map.fromList [("μ", t)]
-    in VASS{..}
-
-reverse :: VASS -> VASS
-reverse s@VASS{..} = s{
-        transitions = collate $ map swap $ decollate transitions
+data VASS = VASS
+    { dimension   :: Integer
+    , places      :: Vector (Name Place)
+    , states      :: Vector (Name State)
+    , transitions :: Map (Name State) (Vector Transition)
     }
-    where 
-        swap :: (Label State, Labelled Transition) -> (Label State, Labelled Transition)
-        swap (preState, (label, (pre,post,postState) ) ) 
-                = (postState, (coerce $ coerce label ++ "'", (post, pre, preState) ) )
+    deriving (Eq, Show)
 
+{-
+{- * Helper functions
 
-----------
--- ** Helper Functions
+    Generic functions which have common usage 
+    or simplify some external code.
+-}
 
--- | Aggregate all KV pairs with the same key into a multimap.
-collate :: Ord a => [(a, b)] -> Map a [b]
-collate = foldr (\(k,v) m -> Map.insertWith (++) k [v] m) mempty
+-- | Get the full range of values from a bounded enumeration.
+range :: (Enum a, Bounded a) => [a]
+range = [ minBound .. maxBound ]
 
--- | Inverse of `collate`.
-decollate :: Ord a => Map a [b] -> [(a,b)]
-decollate = concat . Map.mapWithKey (\k vs -> map (k,) vs) 
+-- | Get one value from an alternative.
+choice :: (Alternative f) => [f a] -> f a
+choice = foldr1 (<|>)
+
+-- | Determine whether some structure contains
+--  an element larger than some value.
+contains :: (Foldable f, Eq a, Ord a) => f a -> a -> Bool
+container `contains` elem = any (elem <=) $ toList container
+
+(!@) :: (Monoid a, Ord k) => Map k a -> k -> a
+map !@ key = Map.findWithDefault mempty key map
+
+-}

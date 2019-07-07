@@ -31,6 +31,7 @@ dependencies:
 - diagrams-lib
 - diagrams-contrib
 - SVGFonts
+- pretty-simple
 
 default-extensions:
 - TypeSynonymInstances
@@ -42,6 +43,8 @@ default-extensions:
 - FlexibleInstances
 - TupleSections
 - LambdaCase
+- GeneralizedNewtypeDeriving
+- TypeFamilies
 
 library:
   source-dirs: src
