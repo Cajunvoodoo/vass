@@ -19,7 +19,7 @@ import qualified Data.Map as Map
 import Text.Megaparsec.Debug
 
 import Data.VASS
-import Data.Coverability
+import Data.VASS.Coverability
 import Data.VASS.Read.Shared
 
 readMIST :: Parser CovProblem

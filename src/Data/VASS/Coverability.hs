@@ -1,4 +1,4 @@
-module Data.Coverability where
+module Data.VASS.Coverability where
 
 import Data.VASS
 
@@ -19,9 +19,10 @@ data CovResult
     deriving Show
 
 data CovProblem = CovProblem 
-    { initial :: Conf
+    { system  :: VASS
+    , initial :: Conf
     , target  :: Conf
-    , system  :: VASS
     }
+    deriving Show
 
 type CovChecker = CovProblem -> IO CovResult

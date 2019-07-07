@@ -7,8 +7,8 @@ import System.Exit (die)
 
 import Data.VASS.Read.Shared
 import Data.VASS.Read.MIST
+import Data.VASS.Coverability
 import Data.VASS
-import Data.Coverability
 
 -- | Take a file representing a coverability problem and return 
 -- the problem as a Haskell value.
