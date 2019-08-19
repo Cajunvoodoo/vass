@@ -1,10 +1,3 @@
-module Data.VASS.Coverability where
-
-import Data.VASS
-
---------------------------------------------------------------------------------
--- * Coverability Problems
-
 {- | Any coverability solver should be able to take in data as a CovProblem
     and output a CovResult.
 
@@ -12,6 +5,10 @@ import Data.VASS
     This provides a unified interface for dealing with solvers 
     AND different filetypes.
 -}
+module Data.VASS.Coverability where
+
+import Data.VASS
+
 
 data CovResult
     = Safe

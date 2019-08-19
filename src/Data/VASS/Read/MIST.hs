@@ -1,8 +1,14 @@
 module Data.VASS.Read.MIST where
 
-import qualified Data.Vector as Vector
+-- Containers
 import Data.Vector (Vector)
+import qualified Data.Vector as Vector
+import Data.Map (Map)
+import qualified Data.Map as Map
+import Data.Set (Set)
+import qualified Data.Set as Set
 
+-- Control flow
 import Text.Megaparsec.Char (space1)
 import Text.Megaparsec hiding (State)
 import qualified Text.Megaparsec.Char as Char
@@ -14,8 +20,6 @@ import Data.Coerce
 import Data.Functor ((<&>))
 import Data.Function ((&))
 
-import Data.Map (Map)
-import qualified Data.Map as Map
 import Text.Megaparsec.Debug
 
 import Data.VASS
@@ -33,7 +37,7 @@ readMIST = do
     let transitions  = Map.insert "μ" (makeTransitions places rules) Map.empty
         initial      = Configuration "μ" $ makeDense initMap places
         target       = Configuration "μ" $ makeDense targetMap places
-        states       = Vector.fromList ["μ"]
+        states       = Set.fromList ["μ"]
 
     let system = VASS (fromIntegral $ length places) places states transitions
     return $ CovProblem {..}
@@ -79,7 +83,7 @@ makeTransitions places rules = let
 
     addPlaceholderNames = Vector.zipWith ($) 
         (Vector.fromList 
-            [setName $ coerce $ "t_" ++ show n | n <- [1..length rules]])
+            [setName $ coerce $ "t_" ++ show n | n <- [0..length rules-1]])
 
     in addPlaceholderNames transitions
 
@@ -89,25 +93,25 @@ makeTransitions places rules = let
 -- * PARSER
 
 sectionVars :: Parser [Name Place]
-sectionVars = do
-    symbol_ "vars"
+sectionVars =  do
+    keyword "vars"
     many $ coerce <$> try identifier
 
 
 sectionRules :: Parser [Rule]
 sectionRules = do
-    symbol_ "rules"
+    keyword "rules"
     many $ try rule
 
 sectionInit :: Parser (Map (Name Place) Integer)
 sectionInit = do
-    symbol_ "init"
+    keyword "init"
     vals <- pair "=" `sepBy` comma
     return $ Map.fromList vals
 
 sectionTarget :: Parser (Map (Name Place) Integer)
 sectionTarget = do
-    symbol_ "target"
+    keyword "target"
     vals <- pair ">=" `sepBy` comma
     return $ Map.fromList vals    
 
@@ -160,7 +164,7 @@ symbol_ :: String -> Parser ()
 symbol_ = void . Lexer.symbol whitespace
 
 keyword :: String -> Parser ()
-keyword w = lexeme (symbol_ w *> notFollowedBy Char.alphaNumChar)
+keyword w = lexeme $ symbol_ w
 
 keywords :: [String]
 keywords = ["vars", "rules", "init", "target"]
