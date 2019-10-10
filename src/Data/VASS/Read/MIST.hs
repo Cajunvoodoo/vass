@@ -1,3 +1,8 @@
+{- | This module is not intended to be used directly. Please see 
+     'Data.VASS.Read' for the intended invocation. You may find this
+     module useful for your own purposes though, so it is exposed in the 
+     usual way.
+-}
 module Data.VASS.Read.MIST where
 
 -- Containers
@@ -14,7 +19,6 @@ import Text.Megaparsec hiding (State)
 import qualified Text.Megaparsec.Char as Char
 import qualified Text.Megaparsec.Char.Lexer as Lexer
 import Data.Maybe
-import Control.Monad (void)
 import Control.Applicative (liftA2)
 import Data.Coerce
 import Data.Functor ((<&>))
@@ -26,6 +30,12 @@ import Data.VASS
 import Data.VASS.Coverability
 import Data.VASS.Read.Shared
 
+{-| A parser for the MIST file format.
+    This is an attempt to faithfully implement the specification as described on 
+    the MIST wiki (<https://github.com/pierreganty/mist/wiki>). 
+    However there may be some corner cases which are not covered. Please report
+    any omissions on this project's issue tracker on GitHub.
+-}
 readMIST :: Parser CovProblem
 readMIST = do
     places <- Vector.fromList <$> sectionVars
@@ -43,6 +53,10 @@ readMIST = do
     return $ CovProblem {..}
 
 
+{-| Convert a mapping from name->value to an indexable vector. 
+    This is needed as our VASS format uses vectors but the MIST format 
+    uses mappings. 
+-}
 makeDense :: Map (Name Place) Integer -> Vector (Name Place) -> Vector Integer
 makeDense sparse = fmap (\p -> Map.findWithDefault 0 p sparse)
 
@@ -141,49 +155,3 @@ rule = do
     semicolon
 
     return $ Rule (Map.fromList conditions) (Map.fromList deltas)
-
---------------------------------------------------------------------------------
--- * LEXING TOOLS
-
-whitespace :: Parser ()
-whitespace = Lexer.space space1 lineComment blockComment
-    where
-    lineComment  = Lexer.skipLineComment "#"
-    blockComment = Lexer.skipBlockComment "/*" "*/"
-
-lexeme :: Parser a -> Parser a
-lexeme = Lexer.lexeme whitespace
-
-integer :: Parser Integer
-integer = lexeme Lexer.decimal
-
-symbol :: String -> Parser String
-symbol = Lexer.symbol whitespace
-
-symbol_ :: String -> Parser ()
-symbol_ = void . Lexer.symbol whitespace
-
-keyword :: String -> Parser ()
-keyword w = lexeme $ symbol_ w
-
-keywords :: [String]
-keywords = ["vars", "rules", "init", "target"]
-
-identifier :: Parser String
-identifier = lexeme (validIdent >>= check)
-    where
-        validIdent = (:) <$> identHead <*> many identTail
-        identHead = Char.letterChar
-        identTail = Char.alphaNumChar <|> oneOf ("_" :: String)
-
-        check x = if x `elem` keywords
-            then fail $ "keyword " ++ show x ++ " cannot be an identifier"
-            else return x
-    
-
-
-semicolon :: Parser String
-semicolon = symbol ";"
-
-comma :: Parser String
-comma = symbol ","
