@@ -38,6 +38,7 @@ import Data.VASS.Read.Shared
 -}
 readMIST :: Parser CovProblem
 readMIST = do
+    keyword ""
     places <- Vector.fromList <$> sectionVars
     rules  <- Vector.fromList <$> sectionRules
 
@@ -120,13 +121,13 @@ sectionRules = do
 sectionInit :: Parser (Map (Name Place) Integer)
 sectionInit = do
     keyword "init"
-    vals <- pair "=" `sepBy` comma
+    vals <- (try (pair "=") <|> pair ">=") `sepBy` comma
     return $ Map.fromList vals
 
 sectionTarget :: Parser (Map (Name Place) Integer)
 sectionTarget = do
     keyword "target"
-    vals <- pair ">=" `sepBy` comma
+    vals <- (try (pair "=") <|> pair ">=") `sepBy` comma
     return $ Map.fromList vals    
 
 

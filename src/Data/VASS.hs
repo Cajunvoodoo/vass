@@ -62,14 +62,14 @@ data VASS = VASS
     { 
       -- | How many places are in the net 
       -- (this must be equal to the length of 'places')
-      dimension   :: Integer 
+      dimension   :: !Integer 
       -- | The ordered vector of labels of places. 
       -- This describes the order of indices in transitions and configurations.
-    , places      :: Vector (Name Place)
+    , places      :: !(Vector (Name Place))
       -- | The unordered set of all states in the system.
-    , states      :: Set (Name State)
+    , states      :: !(Set (Name State))
       -- | A mapping from given states to given transitions.
-    , transitions :: Map (Name State) (Vector Transition)
+    , transitions :: !(Map (Name State) (Vector Transition))
     }
     deriving (Eq, Show)
 
@@ -103,10 +103,10 @@ data Place = Place
     __Post__, and the state to move to. The 'VASS' describes the mapping from
     states to vectors of transitions. -}
 data Transition = Transition 
-    { name      :: Name Transition
-    , pre       :: Vector Integer
-    , post      :: Vector Integer
-    , nextState :: Name State
+    { name      :: !(Name Transition)
+    , pre       :: !(Vector Integer)
+    , post      :: !(Vector Integer)
+    , nextState :: !(Name State)
     } 
     deriving (Eq, Show)
 
@@ -115,8 +115,8 @@ data Transition = Transition
 {-| A configuration comprises the current state of a VASS and the current
     vector (total function from place to number of tokens). -}
 data Configuration a = Configuration
-    { state :: Name State
-    , vec   :: Vector a
+    { state :: !(Name State)
+    , vec   :: !(Vector a)
     }
     deriving (Eq, Show)
 

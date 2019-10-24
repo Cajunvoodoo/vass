@@ -48,7 +48,7 @@ identifier :: Parser String
 identifier = lexeme (validIdent >>= check)
     where
         validIdent = (:) <$> identHead <*> many identTail
-        identHead = Char.letterChar
+        identHead = Char.letterChar   <|> oneOf ("_" :: String)
         identTail = Char.alphaNumChar <|> oneOf ("_" :: String)
 
         check x = if x `elem` keywords
