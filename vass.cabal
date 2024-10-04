@@ -1,0 +1,57 @@
+cabal-version:      3.0
+name:               vass
+version:            0.1.0.0
+-- synopsis:
+-- description:
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             Cajunvoodoo
+maintainer:         27892784+Cajunvoodoo@users.noreply.github.com
+-- copyright:
+category:           Math
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+
+common warnings
+    ghc-options: -Wall
+
+library
+    import:           warnings
+    exposed-modules:
+      Data.VASS
+      Data.VASS.Coverability
+      Data.VASS.Read.MIST
+      Data.VASS.Read.Shared
+      Data.VASS.Read
+      Data.VASS.Utils
+    -- other-modules:
+    -- other-extensions:
+    build-depends:
+     , base ^>=4.18.2.1
+     , containers
+     , vector
+     , megaparsec
+     , filepath
+     , mtl
+     , diagrams
+     , diagrams-svg
+     , diagrams-core
+     , diagrams-lib
+     , diagrams-contrib
+     , SVGFonts
+     , pretty-simple
+    hs-source-dirs:   src
+    default-language: Haskell2010
+    default-extensions:
+     , TypeSynonymInstances
+     , UnicodeSyntax
+     , RecordWildCards
+     , OverloadedStrings
+     , QuasiQuotes
+     , LambdaCase
+     , FlexibleInstances
+     , TupleSections
+     , LambdaCase
+     , GeneralizedNewtypeDeriving
+     , TypeFamilies
