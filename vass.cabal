@@ -25,6 +25,7 @@ library
       Data.VASS.Read.Shared
       Data.VASS.Read
       Data.VASS.Utils
+      Data.VASS.Internals
     -- other-modules:
     -- other-extensions:
     build-depends:
