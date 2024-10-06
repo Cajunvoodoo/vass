@@ -35,4 +35,4 @@ data CovProblem = CovProblem
 data CovResult
     = Safe
     | Unsafe
-    deriving Show
+    deriving (Show, Eq)
